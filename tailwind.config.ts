@@ -13,6 +13,15 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      colors: {
+        ZekSky: "#0d2249ff",
+        ZekSkyLight: "#0d2249ff",
+        ZekPurple: "#a4a3d3ff",
+        ZekPurpleLight: "#F1F0FF",
+        ZekPurple2: "#4f0e63ff",
+        ZekBlueLight: "#bfc5d6ff",
+        ZekBlue: "#d8dadfff",
+      },
     },
   },
   plugins: [],

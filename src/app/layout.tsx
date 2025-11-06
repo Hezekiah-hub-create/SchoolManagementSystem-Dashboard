@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "School Management Dashboard",
   description: "Next.js School Management System",
   icons: {
-    icon: "https://cdn-icons-png.flaticon.com/512/4720/4720451.png"
+    icon: "https://res.cloudinary.com/doatmmlrr/image/upload/v1762434303/ChatGPT_Image_Nov_6_2025_01_00_01_PM_va2yle.png"
   },
 };
 
