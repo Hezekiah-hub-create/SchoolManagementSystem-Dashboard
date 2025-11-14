@@ -1,9 +1,13 @@
+"use client";
+
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { parentsData, role } from "@/lib/data";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import FilterSort from "@/components/FilterSort";
 
 type Parent = {
   id: number;
@@ -57,6 +61,7 @@ const ParentListPage = () => {
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
+          <FormModal table="parent" type="view" data={item} />
           {role === "admin" && (
             <>
               <FormModal table="parent" type="update" data={item} />
@@ -68,6 +73,39 @@ const ParentListPage = () => {
     </tr>
   );
 
+  const [data, setData] = useState(parentsData);
+
+  useEffect(() => {
+    setData(parentsData);
+  }, []);
+
+  const handleFilter = (q: string) => {
+    if (!q) return setData(parentsData);
+    const lower = q.toLowerCase();
+    const filtered = parentsData.filter((p) => {
+      return (
+        p.name.toLowerCase().includes(lower) ||
+        p.students.join(",").toLowerCase().includes(lower) ||
+        (p.email || "").toLowerCase().includes(lower)
+      );
+    });
+    setData(filtered);
+  };
+
+  const handleSort = ({ key, order }: { key: string; order: "asc" | "desc" }) => {
+    const sorted = [...data].sort((a: any, b: any) => {
+      if (key === "students") {
+        return order === "asc" ? a.students.length - b.students.length : b.students.length - a.students.length;
+      }
+      const va = (a as any)[key] || "";
+      const vb = (b as any)[key] || "";
+      if (va < vb) return order === "asc" ? -1 : 1;
+      if (va > vb) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+    setData(sorted);
+  };
+
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -76,20 +114,13 @@ const ParentListPage = () => {
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
-            {role === "admin" && (
-              <FormModal table="teacher" type="create"/>
-            )}
+            <FilterSort onFilter={handleFilter} onSort={handleSort} filterPlaceholder="Filter parents or students..." sortKeys={["name", "students"]} />
+            {role === "admin" && <FormModal table="parent" type="create" />}
           </div>
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={parentsData} />
+  <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
       <Pagination />
     </div>
