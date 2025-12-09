@@ -4,30 +4,24 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
-import { Class, Teacher, Grade, Prisma } from "@prisma/client";
+import { Announcement, Class, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 
-type ClassList = Class & { supervisor?: Teacher } & { grade: Grade };
+type MessageList = Announcement & { class?: Class };
 
 const columns = [
   {
-    header: "Class Name",
-    accessor: "name",
+    header: "Title",
+    accessor: "title",
   },
   {
-    header: "Capacity",
-    accessor: "capacity",
-    className: "hidden md:table-cell",
+    header: "Class",
+    accessor: "class",
   },
   {
-    header: "Grade",
-    accessor: "grade",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Supervisor",
-    accessor: "supervisor",
+    header: "Date",
+    accessor: "date",
     className: "hidden md:table-cell",
   },
   {
@@ -36,23 +30,20 @@ const columns = [
   },
 ];
 
-const ClassListPage = async ({ searchParams }: { searchParams: any }) => {
+const MessageListPage = async ({ searchParams }: { searchParams: any }) => {
   const resolvedSearchParams = await searchParams;
   const { page, ...queryParams } = resolvedSearchParams ?? {};
   const p = page ? parseInt(page) : 1;
 
   // URL PARAMS CONDITION
-  const query: Prisma.ClassWhereInput = {}
+  const query: Prisma.AnnouncementWhereInput = {}
 
- if (queryParams) {
+  if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
         switch (key) {
-          case "supervisorId":
-            query.supervisorId = value;
-            break;
           case "search":
-            query.name = { contains: value as string, mode: "insensitive" };
+            query.title = { contains: value as string, mode: "insensitive" };
             break;
           default:
             break;
@@ -62,31 +53,31 @@ const ClassListPage = async ({ searchParams }: { searchParams: any }) => {
   }
 
   const [data, count] = await prisma.$transaction([
-    prisma.class.findMany({
+    prisma.announcement.findMany({
       where: query,
-      include: { supervisor: true, grade: true },
+      include: { class: true },
       take: ITEM_PER_PAGE,
       skip: (p - 1) * ITEM_PER_PAGE,
       orderBy: { id: 'asc' },
     }),
-    prisma.class.count({ where: query }),
+    prisma.announcement.count({ where: query }),
   ]);
 
-  const renderRow = (item: ClassList) => (
+  const renderRow = (item: MessageList) => (
     <tr
       key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
     >
-      <td className="flex items-center gap-4 p-4">{item.name}</td>
-      <td className="hidden md:table-cell">{item.capacity}</td>
-      <td className="hidden md:table-cell">{item.grade.level}</td>
-      <td className="hidden md:table-cell">{item.supervisor?.name || 'N/A'}</td>
+      <td className="flex items-center gap-4 p-4">{item.title}</td>
+      <td>{item.class?.name || 'All'}</td>
+      <td className="hidden md:table-cell">{item.date.toISOString().split('T')[0]}</td>
       <td>
         <div className="flex items-center gap-2">
+          <FormModal table="announcement" type="view" data={item} />
           {role === "admin" && (
             <>
-              <FormModal table="class" type="update" data={item} />
-              <FormModal table="class" type="delete" id={item.id} />
+              <FormModal table="announcement" type="update" data={item} />
+              <FormModal table="announcement" type="delete" id={item.id} />
             </>
           )}
         </div>
@@ -98,17 +89,19 @@ const ClassListPage = async ({ searchParams }: { searchParams: any }) => {
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Classes</h1>
+        <h1 className="hidden md:block text-lg font-semibold">All Messages</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && <FormModal table="class" type="create" />}
+            {role === "admin" && (
+              <FormModal table="announcement" type="create" />
+            )}
           </div>
         </div>
       </div>
@@ -120,4 +113,4 @@ const ClassListPage = async ({ searchParams }: { searchParams: any }) => {
   );
 };
 
-export default ClassListPage;
+export default MessageListPage;

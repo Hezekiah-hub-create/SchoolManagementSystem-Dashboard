@@ -24,7 +24,7 @@ const SingleStudentPage = () => {
             </div>
             <div className="w-2/3 flex flex-col justify-between gap-4">
               <h1 className="text-xl font-semibold">Cameron Moran</h1>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-black">
                 Lorem ipsum, dolor sit amet consectetur adipisicing elit.
               </p>
               <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
@@ -60,7 +60,7 @@ const SingleStudentPage = () => {
               />
               <div className="">
                 <h1 className="text-xl font-semibold">90%</h1>
-                <span className="text-sm text-gray-400">Attendance</span>
+                <span className="text-sm text-black">Attendance</span>
               </div>
             </div>
             {/* CARD */}
@@ -74,7 +74,7 @@ const SingleStudentPage = () => {
               />
               <div className="">
                 <h1 className="text-xl font-semibold">6th</h1>
-                <span className="text-sm text-gray-400">Grade</span>
+                <span className="text-sm text-black">Grade</span>
               </div>
             </div>
             {/* CARD */}
@@ -88,7 +88,7 @@ const SingleStudentPage = () => {
               />
               <div className="">
                 <h1 className="text-xl font-semibold">18</h1>
-                <span className="text-sm text-gray-400">Lessons</span>
+                <span className="text-sm text-black">Lessons</span>
               </div>
             </div>
             {/* CARD */}
@@ -102,7 +102,7 @@ const SingleStudentPage = () => {
               />
               <div className="">
                 <h1 className="text-xl font-semibold">6A</h1>
-                <span className="text-sm text-gray-400">Class</span>
+                <span className="text-sm text-black">Class</span>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ const SingleStudentPage = () => {
             <Link className="p-3 rounded-md bg-ZekPurpleLight" href="/">
               Student&apos;s Lessons
             </Link>
-            <Link className="p-3 rounded-md bg-purple-300" href="/">
+            <Link className="p-3 rounded-md bg-purple-300" href={`/list/teachers?classId=${2}`}>
               Student&apos;s Teachers
             </Link>
             <Link className="p-3 rounded-md bg-pink-200" href="/">

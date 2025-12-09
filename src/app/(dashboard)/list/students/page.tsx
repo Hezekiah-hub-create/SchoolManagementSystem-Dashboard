@@ -3,20 +3,15 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { role, studentsData } from "@/lib/data";
+import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
+import { Student, Class, Grade, Prisma } from "@prisma/client";
+import { ITEM_PER_PAGE_STUDENT } from "@/lib/settings";
 
-type Student = {
-  id: number;
-  studentId: string;
-  name: string;
-  email?: string;
-  photo: string;
-  phone?: string;
-  grade: number;
-  class: string;
-  address: string;
-};
+
+
+type StudentList = Student & { class: Class } & { grade: Grade };
 
 const columns = [
   {
@@ -48,52 +43,96 @@ const columns = [
     accessor: "action",
   },
 ];
+const renderRow = (item: StudentList) => (
+  <tr
+    key={item.id}
+    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
+  >
+    <td className="flex items-center gap-4 p-4">
+      <Image
+        src={item.img || "/noAvatar.png"}
+        alt=""
+        width={40}
+        height={40}
+        className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
+      />
+      <div className="flex flex-col">
+        <h3 className="font-semibold">{item.name}</h3>
+        <p className="text-xs text-gray-500">{item.class.name}</p>
+      </div>
+    </td>
+    <td className="hidden md:table-cell">{item.username}</td>
+    <td className="hidden md:table-cell">{item.grade.level}</td>
+    <td className="hidden md:table-cell">{item.phone}</td>
+    <td className="hidden md:table-cell">{item.address}</td>
+    <td>
+      <div className="flex items-center gap-2">
+        <Link href={`/list/students/${item.id}`}>
+          {/* <button className="w-7 h-7 flex items-center justify-center rounded-full bg-blue-200">
+            <Image src="/view.png" alt="" width={16} height={16} />
+          </button> */}
+          <FormModal table="student" type="view" id={+item.id}/>
+        </Link>
+        {role === "admin" && (
+          // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
+          //   <Image src="/delete.png" alt="" width={16} height={16} />
+          // </button>
+          <FormModal table="student" type="update" data={item}/>
+        )}
+        {role === "admin" && (
+          <FormModal table="student" type="delete" id={+item.id}/>
+        )}
+      </div>
+    </td>
+  </tr>
+);
 
-const StudentListPage = () => {
-  const renderRow = (item: Student) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
-    >
-      <td className="flex items-center gap-4 p-4">
-        <Image
-          src={item.photo}
-          alt=""
-          width={40}
-          height={40}
-          className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
-          <p className="text-xs text-gray-500">{item.class}</p>
-        </div>
-      </td>
-      <td className="hidden md:table-cell">{item.studentId}</td>
-      <td className="hidden md:table-cell">{item.grade}</td>
-      <td className="hidden md:table-cell">{item.phone}</td>
-      <td className="hidden md:table-cell">{item.address}</td>
-      <td>
-        <div className="flex items-center gap-2">
-          <Link href={`/list/students/${item.id}`}>
-            {/* <button className="w-7 h-7 flex items-center justify-center rounded-full bg-blue-200">
-              <Image src="/view.png" alt="" width={16} height={16} />
-            </button> */}
-            <FormModal table="student" type="view" id={item.id}/>
-          </Link>
-          {role === "admin" && (
-            // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
-            //   <Image src="/delete.png" alt="" width={16} height={16} />
-            // </button>
-            <FormModal table="student" type="update" data={item}/>
-          )}
-          {role === "admin" && (
-            <FormModal table="student" type="delete" id={item.id}/>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
+const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
+  const resolvedSearchParams = await searchParams;
+  const { page, ...queryParams } = resolvedSearchParams ?? {};
+  const p = page ? parseInt(page) : 1;
 
+  // URL PARAMS CONDITION
+  const query: Prisma.StudentWhereInput = {}
+
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "teacherId":
+            query.class = {
+              lessons: {
+                some: {
+                  teacherId: value as string,
+                },
+              },
+            };
+            break;
+          case "search":
+            query.name = { contains: value as string, mode: "insensitive" };
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.student.findMany({
+      where: query,
+      include: {
+        class: true,
+        grade: true,
+      },
+      take: ITEM_PER_PAGE_STUDENT,
+      skip: (p - 1) * ITEM_PER_PAGE_STUDENT,
+      orderBy: {
+        id: 'asc',
+      },
+    }),
+    prisma.student.count({ where: query }),
+  ])
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
@@ -118,9 +157,9 @@ const StudentListPage = () => {
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={studentsData} />
+      <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination page={p} count={count} />
     </div>
   );
 };

@@ -2,15 +2,13 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { announcementsData, role } from "@/lib/data";
+import { role } from "@/lib/data";
+import prisma from "@/lib/prisma";
+import { Announcement, Class, Prisma } from "@prisma/client";
 import Image from "next/image";
+import { ITEM_PER_PAGE } from "@/lib/settings";
 
-type Announcement = {
-  id: number;
-  title: string;
-  class: string;
-  date: string;
-};
+type AnnouncementList = Announcement & { class?: Class | null };
 
 const columns = [
   {
@@ -32,15 +30,64 @@ const columns = [
   },
 ];
 
-const AnnouncementListPage = () => {
-  const renderRow = (item: Announcement) => (
+const AnnouncementListPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  // Await searchParams
+  const params = await searchParams;
+  const { page, ...queryParams } = params ?? {};
+  const p = page ? parseInt(page as string) : 1;
+
+  // Build query
+  const query: Prisma.AnnouncementWhereInput = {};
+
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined && value !== '') {
+        switch (key) {
+          case "search":
+            query.OR = [
+              { title: { contains: value as string, mode: "insensitive" } },
+              { description: { contains: value as string, mode: "insensitive" } },
+            ];
+            break;
+          case "classId":
+            query.classId = parseInt(value as string);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.announcement.findMany({
+      where: query,
+      include: { class: true },
+      take: ITEM_PER_PAGE,
+      skip: (p - 1) * ITEM_PER_PAGE,
+      orderBy: { id: 'asc' },
+    }),
+    prisma.announcement.count({ where: query }),
+  ]);
+
+  const renderRow = (item: AnnouncementList) => (
     <tr
       key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.class}</td>
-      <td className="hidden md:table-cell">{item.date}</td>
+      <td>{item.class?.name || 'All'}</td>
+      <td className="hidden md:table-cell">
+        {new Date(item.date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        })}
+      </td>
       <td>
         <div className="flex items-center gap-2">
           {role === "admin" && (
@@ -58,9 +105,7 @@ const AnnouncementListPage = () => {
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">
-          All Announcements
-        </h1>
+        <h1 className="hidden md:block text-lg font-semibold">All Announcements</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
@@ -77,9 +122,9 @@ const AnnouncementListPage = () => {
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={announcementsData} />
+      <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination page={p} count={count} />
     </div>
   );
 };

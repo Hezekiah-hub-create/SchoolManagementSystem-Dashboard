@@ -1,22 +1,14 @@
-"use client";
-
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { parentsData, role } from "@/lib/data";
+import { role } from "@/lib/data";
+import prisma from "@/lib/prisma";
+import { Parent, Student, Prisma } from "@prisma/client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import FilterSort from "@/components/FilterSort";
+import { ITEM_PER_PAGE } from "@/lib/settings";
 
-type Parent = {
-  id: number;
-  name: string;
-  email?: string;
-  students: string[];
-  phone: string;
-  address: string;
-};
+type ParentList = Parent & { students: Student[] };
 
 const columns = [
   {
@@ -44,11 +36,43 @@ const columns = [
   },
 ];
 
-const ParentListPage = () => {
-  const renderRow = (item: Parent) => (
+const ParentListPage = async ({ searchParams }: { searchParams: any }) => {
+  const resolvedSearchParams = await searchParams;
+  const { page, ...queryParams } = resolvedSearchParams ?? {};
+  const p = page ? parseInt(page) : 1;
+
+  // URL PARAMS CONDITION
+  const query: Prisma.ParentWhereInput = {}
+
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "search":
+            query.name = { contains: value as string, mode: "insensitive" };
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.parent.findMany({
+      where: query,
+      include: { students: true },
+      take: ITEM_PER_PAGE,
+      skip: (p - 1) * ITEM_PER_PAGE,
+      orderBy: { id: 'asc' },
+    }),
+    prisma.parent.count({ where: query }),
+  ]);
+
+  const renderRow = (item: ParentList) => (
     <tr
       key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">
         <div className="flex flex-col">
@@ -56,7 +80,7 @@ const ParentListPage = () => {
           <p className="text-xs text-gray-500">{item?.email}</p>
         </div>
       </td>
-      <td className="hidden md:table-cell">{item.students.join(",")}</td>
+      <td className="hidden md:table-cell">{item.students.map(s => s.name).join(",")}</td>
       <td className="hidden md:table-cell">{item.phone}</td>
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
@@ -65,46 +89,13 @@ const ParentListPage = () => {
           {role === "admin" && (
             <>
               <FormModal table="parent" type="update" data={item} />
-              <FormModal table="parent" type="delete" id={item.id} />
+              <FormModal table="parent" type="delete" id={+item.id} />
             </>
           )}
         </div>
       </td>
     </tr>
   );
-
-  const [data, setData] = useState(parentsData);
-
-  useEffect(() => {
-    setData(parentsData);
-  }, []);
-
-  const handleFilter = (q: string) => {
-    if (!q) return setData(parentsData);
-    const lower = q.toLowerCase();
-    const filtered = parentsData.filter((p) => {
-      return (
-        p.name.toLowerCase().includes(lower) ||
-        p.students.join(",").toLowerCase().includes(lower) ||
-        (p.email || "").toLowerCase().includes(lower)
-      );
-    });
-    setData(filtered);
-  };
-
-  const handleSort = ({ key, order }: { key: string; order: "asc" | "desc" }) => {
-    const sorted = [...data].sort((a: any, b: any) => {
-      if (key === "students") {
-        return order === "asc" ? a.students.length - b.students.length : b.students.length - a.students.length;
-      }
-      const va = (a as any)[key] || "";
-      const vb = (b as any)[key] || "";
-      if (va < vb) return order === "asc" ? -1 : 1;
-      if (va > vb) return order === "asc" ? 1 : -1;
-      return 0;
-    });
-    setData(sorted);
-  };
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
@@ -114,15 +105,20 @@ const ParentListPage = () => {
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <FilterSort onFilter={handleFilter} onSort={handleSort} filterPlaceholder="Filter parents or students..." sortKeys={["name", "students"]} />
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
+              <Image src="/filter.png" alt="" width={14} height={14} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
+              <Image src="/sort.png" alt="" width={14} height={14} />
+            </button>
             {role === "admin" && <FormModal table="parent" type="create" />}
           </div>
         </div>
       </div>
       {/* LIST */}
-  <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
-      <Pagination />
+      <Pagination page={p} count={count} />
     </div>
   );
 };

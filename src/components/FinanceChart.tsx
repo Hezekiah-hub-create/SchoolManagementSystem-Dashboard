@@ -26,7 +26,7 @@ const data = [
   {
     name: "Mar",
     income: 2000,
-    expense: 9800,
+    expense: 3000,
   },
   {
     name: "Apr",
@@ -50,23 +50,23 @@ const data = [
   },
   {
     name: "Aug",
-    income: 3490,
-    expense: 4300,
+    income: 5090,
+    expense: 2000,
   },
   {
     name: "Sep",
-    income: 3490,
+    income: 5000,
     expense: 4300,
   },
   {
     name: "Oct",
-    income: 3490,
-    expense: 4300,
+    income: 4090,
+    expense: 3000,
   },
   {
     name: "Nov",
     income: 3490,
-    expense: 4300,
+    expense: 2500,
   },
   {
     name: "Dec",
@@ -113,9 +113,9 @@ const FinanceChart = () => {
             type="monotone"
             dataKey="income"
             stroke="#0d2249ff"
-            strokeWidth={5}
+            strokeWidth={3}
           />
-          <Line type="monotone" dataKey="expense" stroke="#8a1818ff" strokeWidth={5}/>
+          <Line type="monotone" dataKey="expense" stroke="#8a1818ff" strokeWidth={3}/>
         </LineChart>
       </ResponsiveContainer>
     </div>
