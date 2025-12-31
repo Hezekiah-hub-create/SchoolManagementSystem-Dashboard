@@ -1,0 +1,4 @@
+- [ ] Update "What Has Been Done So Far" section in summary.md to include recent additions like Settings management, Role-based access control, new API routes, and database schema updates.
+- [ ] Update "Database Schema Logic" section to include new models: Settings, Role, and UserRole.
+- [ ] Review and update "Application Architecture Logic" if necessary to reflect new features.
+- [ ] Verify the updated summary.md for accuracy and completeness.

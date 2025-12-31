@@ -1,4 +1,6 @@
-import { role } from "@/lib/data";
+"use client";
+
+import { useUser, useClerk } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -68,7 +70,7 @@ const menuItems = [
       },
       {
         icon: "/attendance.png",
-        label: "Attendances",
+        label: "Attendance",
         href: "/list/attendances",
         visible: ["admin", "teacher", "student", "parent"],
       },
@@ -78,12 +80,12 @@ const menuItems = [
         href: "/list/events",
         visible: ["admin", "teacher", "student", "parent"],
       },
-      {
-        icon: "/message.png",
-        label: "Messages",
-        href: "/list/messages",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
+      // {
+      //   icon: "/message.png",
+      //   label: "Messages",
+      //   href: "/list/messages",
+      //   visible: ["admin", "teacher", "student", "parent"],
+      // },
       {
         icon: "/announcement.png",
         label: "Announcements",
@@ -101,12 +103,12 @@ const menuItems = [
         href: "/profile",
         visible: ["admin", "teacher", "student", "parent"],
       },
-      {
-        icon: "/setting.png",
-        label: "Settings",
-        href: "/settings",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
+      // {
+      //   icon: "/setting.png",
+      //   label: "Settings",
+      //   href: "/settings",
+      //   visible: ["admin", "teacher", "student", "parent"],
+      // },
       {
         icon: "/logout.png",
         label: "Logout",
@@ -118,20 +120,40 @@ const menuItems = [
 ];
 
 const Menu = () => {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const role = user?.publicMetadata?.role as string;
+
+  const handleLogout = () => {
+    signOut({ redirectUrl: "/" });
+  };
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
         <div className="flex flex-col gap-2" key={i.title}>
-          <span className="hidden lg:block text-gray-2000 font-light my-4">
+          <span className="hidden lg:block text-gray-400 font-light my-4">
             {i.title}
           </span>
           {i.items.map((item) => {
             if (item.visible.includes(role)) {
+              if (item.label === "Logout") {
+                return (
+                  <button
+                    onClick={handleLogout}
+                    key={item.label}
+                    className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-ZekPurpleLight hover:text-ZekPurple transition-colors w-full"
+                  >
+                    <Image src={item.icon} alt="" width={20} height={20} />
+                    <span className="hidden lg:block">{item.label}</span>
+                  </button>
+                );
+              }
               return (
                 <Link
                   href={item.href}
                   key={item.label}
-                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-900 py-2 md:px-2 rounded-md hover:bg-ZekBlue"
+                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-ZekPurpleLight hover:text-ZekPurple transition-colors"
                 >
                   <Image src={item.icon} alt="" width={20} height={20} />
                   <span className="hidden lg:block">{item.label}</span>

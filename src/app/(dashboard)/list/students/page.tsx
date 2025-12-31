@@ -1,4 +1,5 @@
 import FormModal from "@/components/FormModal";
+import FormContainer from "@/components/FormContainer";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -8,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Student, Class, Grade, Prisma } from "@prisma/client";
 import { ITEM_PER_PAGE_STUDENT } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 
 
 
@@ -77,10 +79,10 @@ const renderRow = (item: StudentList) => (
           // <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaPurple">
           //   <Image src="/delete.png" alt="" width={16} height={16} />
           // </button>
-          <FormModal table="student" type="update" data={item}/>
+          <FormContainer table="student" type="update" data={item} id={item.id} />
         )}
         {role === "admin" && (
-          <FormModal table="student" type="delete" id={+item.id}/>
+          <FormModal table="student" type="delete" id={item.id}/>
         )}
       </div>
     </td>
@@ -92,8 +94,27 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
   const { page, ...queryParams } = resolvedSearchParams ?? {};
   const p = page ? parseInt(page) : 1;
 
+  const { sessionClaims } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const userId = (sessionClaims?.sub as string);
+
   // URL PARAMS CONDITION
   const query: Prisma.StudentWhereInput = {}
+
+  // Apply teacher filter if role is teacher
+  if (role === "teacher") {
+    query.class = {
+      lessons: {
+        some: {
+          teachers: {
+            some: {
+              id: userId,
+            },
+          },
+      },
+    },
+    };
+  }
 
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
@@ -102,10 +123,14 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
           case "teacherId":
             query.class = {
               lessons: {
-                some: {
-                  teacherId: value as string,
-                },
-              },
+        some: {
+          teachers: {
+            some: {
+              id: userId,
+            },
+          },
+      },
+    },
             };
             break;
           case "search":
@@ -127,9 +152,9 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
       },
       take: ITEM_PER_PAGE_STUDENT,
       skip: (p - 1) * ITEM_PER_PAGE_STUDENT,
-      orderBy: {
-        id: 'asc',
-      },
+    orderBy: {
+      id: 'desc',
+    },
     }),
     prisma.student.count({ where: query }),
   ])
@@ -141,17 +166,17 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
+            {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
               <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+            </button> */}
             {role === "admin" && (
               // <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               //   <Image src="/plus.png" alt="" width={14} height={14} />
               // </button>
-              <FormModal table="student" type="create"/>
+              <FormContainer table="student" type="create" />
             )}
           </div>
         </div>

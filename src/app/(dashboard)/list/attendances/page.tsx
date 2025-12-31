@@ -1,58 +1,37 @@
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role } from "@/lib/data";
+import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { Attendance, Student, Lesson, Subject, Class, Teacher, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 
-type AttendanceList = Attendance & { student: Student } & { lesson: Lesson & { subject: Subject; class: Class; teacher: Teacher } };
-
-const columns = [
-  {
-    header: "Student",
-    accessor: "student",
-  },
-  {
-    header: "Subject",
-    accessor: "subject",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Teacher",
-    accessor: "teacher",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Present",
-    accessor: "present",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
+type AttendanceList = Attendance & { student: Student } & { lesson: Lesson & { subject: Subject; class: Class; teachers: Teacher[] } };
 
 const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {
+  // Get auth info
+  const { sessionClaims, userId } = await auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+
   const resolvedSearchParams = await searchParams;
   const { page, ...queryParams } = resolvedSearchParams ?? {};
   const p = page ? parseInt(page) : 1;
 
   // URL PARAMS CONDITION
   const query: Prisma.AttendanceWhereInput = {}
+
+  // ROLE-BASED CONDITIONS
+  if (role === "parent") {
+    query.student = { parentId: userId! };
+  } else if (role === "teacher") {
+    query.lesson = { teachers: { some: { id: userId! } } };
+  } else if (role === "student") {
+    query.studentId = userId!;
+  }
+  // Admin sees all, no additional filter
 
   if(queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
@@ -63,7 +42,7 @@ const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {
               { student: { name: { contains: value as string, mode: 'insensitive' } } },
               { lesson: { subject: { name: { contains: value as string, mode: 'insensitive' } } } },
               { lesson: { class: { name: { contains: value as string, mode: 'insensitive' } } } },
-              { lesson: { teacher: { name: { contains: value as string, mode: 'insensitive' } } } },
+              { lesson: { teachers: { some: { name: { contains: value as string, mode: 'insensitive' } } } } },
               // {present: value === 'Yes' ? true : value === 'no' ? false : undefined},
             ]
         }
@@ -77,7 +56,7 @@ const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {
       include: {
         student: true,
         lesson: {
-          include: { subject: true, class: true, teacher: true },
+          include: { subject: true, class: true, teachers: true },
         },
       },
       take: ITEM_PER_PAGE,
@@ -87,24 +66,64 @@ const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {
     prisma.attendance.count({ where: query }),
   ]);
 
+  const columns = [
+    {
+      header: "Student",
+      accessor: "student",
+    },
+    {
+      header: "Subject",
+      accessor: "subject",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Teacher",
+      accessor: "teacher",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+      className: "hidden md:table-cell",
+    },
+    {
+      header: "Present",
+      accessor: "present",
+      className: "hidden md:table-cell",
+    },
+     ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
+  ];
+
   const renderRow = (item: AttendanceList) => (
     <tr
       key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-ZekPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.student.name}</td>
       <td className="hidden md:table-cell">{item.lesson.subject.name}</td>
       <td className="hidden md:table-cell">{item.lesson.class.name}</td>
-      <td className="hidden md:table-cell">{item.lesson.teacher.name}</td>
+      <td className="hidden md:table-cell">{item.lesson.teachers[0]?.name}</td>
       <td className="hidden md:table-cell">{item.date.toISOString().split('T')[0]}</td>
       <td className="hidden md:table-cell">{item.present ? 'Yes' : 'No'}</td>
       <td>
         <div className="flex items-center gap-2">
-          <FormModal table="attendance" type="view" data={item} />
+          {/* <FormModal table="attendance" type="view" data={item} /> */}
           {(role === "admin" || role === "teacher") && (
             <>
-              <FormModal table="attendance" type="update" data={item} />
-              <FormModal table="attendance" type="delete" id={item.id} />
+              <FormContainer table="attendance" type="update" data={item} />
+              <FormContainer table="attendance" type="delete" id={item.id} />
             </>
           )}
         </div>
@@ -120,14 +139,14 @@ const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+            {/* <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-ZekPurple">
               <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+            </button> */}
             {(role === "admin" || role === "teacher") && (
-              <FormModal table="attendance" type="create" />
+              <FormContainer table="attendance" type="create" />
             )}
           </div>
         </div>

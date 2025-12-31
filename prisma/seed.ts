@@ -88,7 +88,7 @@ async function main() {
         endTime: new Date(new Date().setHours(new Date().getHours() + 3)), 
         subjectId: (i % 10) + 1, 
         classId: (i % 6) + 1, 
-        teacherId: `teacher${(i % 15) + 1}`, 
+        teachers: { connect: [{ id: `teacher${(i % 15) + 1}` }] },
       },
     });
   }
@@ -104,9 +104,26 @@ async function main() {
         email: `parent${i}@example.com`,
         phone: `123-456-789${i}`,
         address: `Address${i}`,
+        bloodType: "O+",
+        sex: i % 2 === 0 ? UserSex.MALE : UserSex.FEMALE,
       },
     });
   }
+
+  // Add specific parent from task
+  await prisma.parent.create({
+    data: {
+      id: "ParentT1",
+      username: "ParentT1",
+      name: "Test",
+      surname: "parent",
+      email: "parenttest@example.com",
+      phone: "433-435-634",
+      address: "AddressTestParent",
+      bloodType: "N/A",
+      sex: UserSex.MALE, // Default since N/A
+    },
+  });
 
   // STUDENT
   for (let i = 1; i <= 50; i++) {
@@ -142,13 +159,13 @@ async function main() {
   }
 
   // ASSIGNMENT
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 30; i++) {
     await prisma.assignment.create({
       data: {
-        title: `Assignment ${i}`, 
-        startDate: new Date(new Date().setHours(new Date().getHours() + 1)), 
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)), 
-        lessonId: (i % 30) + 1, 
+        title: `Assignment ${i}`,
+        startDate: new Date(new Date().setHours(new Date().getHours() + 1)),
+        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
+        lessonId: i,
       },
     });
   }

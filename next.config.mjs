@@ -1,8 +1,67 @@
+// // /** @type {import('next').NextConfig} */
+// // const nextConfig = {
+// //   images: {
+// //     remotePatterns: [{ hostname: "images.pexels.com" }],
+// //   },
+// // };
+
+// // export default nextConfig;
+
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   images: {
+//     remotePatterns: [
+//       {
+//         protocol: 'https',
+//         hostname: 'res.cloudinary.com',
+//         pathname: '/doatmmlrr/**', // Your specific Cloudinary account
+//       },
+//       // Add localhost for development
+//       {
+//         protocol: 'http',
+//         hostname: 'localhost',
+//         port: '3000',
+//         pathname: '/**',
+//       },
+//     ],
+//   },
+// }
+
+// export default nextConfig;
+
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    remotePatterns: [{ hostname: "images.pexels.com" }],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.pexels.com', // Covers all pexels subdomains
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+      },
+      // Add other domains you might use
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.githubusercontent.com',
+      },
+    ],
   },
-};
+}
 
 export default nextConfig;

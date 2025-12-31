@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Admin {
@@ -23,16 +23,16 @@ model Student {
   img         String?
   bloodType   String
   sex         UserSex
+  birthday    DateTime?
   createdAt   DateTime     @default(now())
-  parentId    String
-  parent      Parent       @relation(fields: [parentId], references: [id])
+  parentId    String?
+  parent      Parent?      @relation(fields: [parentId], references: [id])
   classId     Int
   class       Class        @relation(fields: [classId], references: [id])
   gradeId     Int
   grade       Grade        @relation(fields: [gradeId], references: [id])
   attendances Attendance[]
   results     Result[]
-  birthday    DateTime
 }
 
 model Teacher {
@@ -46,11 +46,11 @@ model Teacher {
   img       String?
   bloodType String
   sex       UserSex
+  birthday  DateTime?
   createdAt DateTime  @default(now())
   subjects  Subject[]
-  lessons   Lesson[]
+  lessons   Lesson[]  @relation("LessonTeacher")
   classes   Class[]
-  birthday  DateTime
 }
 
 model Parent {
@@ -61,6 +61,10 @@ model Parent {
   email     String?   @unique
   phone     String    @unique
   address   String
+  img       String?
+  bloodType String?
+  sex       UserSex?
+  birthday  DateTime?
   createdAt DateTime  @default(now())
   students  Student[]
 }
@@ -106,8 +110,7 @@ model Lesson {
   subject     Subject      @relation(fields: [subjectId], references: [id])
   classId     Int
   class       Class        @relation(fields: [classId], references: [id])
-  teacherId   String
-  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  teachers    Teacher[]    @relation("LessonTeacher")
   exams       Exam[]
   assignments Assignment[]
   attendances Attendance[]
@@ -177,6 +180,33 @@ model Announcement {
 
   classId Int?
   class   Class? @relation(fields: [classId], references: [id])
+}
+
+model Settings {
+  id       Int      @id @default(autoincrement())
+  category String   @unique
+  data     Json
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  permissions Json
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userRoles   UserRole[]
+}
+
+model UserRole {
+  id     Int     @id @default(autoincrement())
+  userId String
+  roleId Int
+  role   Role    @relation(fields: [roleId], references: [id])
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, roleId])
 }
 
 enum UserSex {

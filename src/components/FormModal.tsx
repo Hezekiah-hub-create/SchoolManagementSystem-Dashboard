@@ -1,10 +1,24 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Plus, Edit, Trash2, X, Eye } from "lucide-react";
 import LoadingSpinner from "./LoadingSpinner";
 import { resultsData } from "@/lib/data";
+import {
+  deleteSubject,
+  deleteClass,
+  deleteTeacher,
+  deleteStudent,
+  deleteExam,
+  deleteParent,
+  deleteLesson,
+  deleteAssignment,
+  deleteResult,
+  deleteAttendance,
+  deleteEvent,
+  deleteAnnouncement,
+} from "@/lib/actions";
 
 // dynamic imports for forms
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"));
@@ -21,20 +35,20 @@ const EventForm = dynamic(() => import("./forms/EventForm"));
 const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"));
 
 const forms: {
-  [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+  [key: string]: (type: "create" | "update", data: any, relatedData: any, setOpen: Dispatch<SetStateAction<boolean>>) => JSX.Element;
 } = {
-  teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />,
-  parent: (type, data) => <ParentForm type={type} data={data} />,
-  subject: (type, data) => <SubjectForm type={type} data={data} />,
-  class: (type, data) => <ClassForm type={type} data={data} />,
-  lesson: (type, data) => <LessonForm type={type} data={data} />,
-  exam: (type, data) => <ExamForm type={type} data={data} />,
-  assignment: (type, data) => <AssignmentForm type={type} data={data} />,
-  result: (type, data) => <ResultForm type={type} data={data} />,
-  attendance: (type, data) => <AttendanceForm type={type} data={data} />,
-  event: (type, data) => <EventForm type={type} data={data} />,
-  announcement: (type, data) => <AnnouncementForm type={type} data={data} />,
+  teacher: (type, data, relatedData, setOpen) => <TeacherForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  student: (type, data, relatedData, setOpen) => <StudentForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  parent: (type, data, relatedData, setOpen) => <ParentForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  subject: (type, data, relatedData, setOpen) => <SubjectForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  class: (type, data, relatedData, setOpen) => <ClassForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  lesson: (type, data, relatedData, setOpen) => <LessonForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  exam: (type, data, relatedData, setOpen) => <ExamForm type={type} data={data} relatedData={relatedData} setOpen={setOpen} />,
+  assignment: (type, data, relatedData, setOpen) => <AssignmentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  result: (type, data, relatedData, setOpen) => <ResultForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  attendance: (type, data, relatedData, setOpen) => <AttendanceForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  event: (type, data, relatedData, setOpen) => <EventForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  announcement: (type, data, relatedData, setOpen) => <AnnouncementForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 const FormModal = ({
@@ -42,6 +56,7 @@ const FormModal = ({
   type,
   data,
   id,
+  relatedData,
 }: {
   table:
     | "teacher"
@@ -58,7 +73,8 @@ const FormModal = ({
     | "announcement";
   type: "create" | "update" | "delete" | "view";
   data?: any;
-  id?: number;
+  id?: string | number;
+  relatedData?: any;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor = "bg-ZekPurple";
@@ -83,8 +99,40 @@ const FormModal = ({
 
   const Form = () => {
     if (type === "delete" && id) {
+      const getDeleteAction = () => {
+        switch (table) {
+          case "subject":
+            return deleteSubject;
+          case "class":
+            return deleteClass;
+          case "teacher":
+            return deleteTeacher;
+          case "student":
+            return deleteStudent;
+          case "exam":
+            return deleteExam;
+          case "parent":
+            return deleteParent;
+          case "lesson":
+            return deleteLesson;
+          case "assignment":
+            return deleteAssignment;
+          case "result":
+            return deleteResult;
+          case "attendance":
+            return deleteAttendance;
+          case "event":
+            return deleteEvent;
+          case "announcement":
+            return deleteAnnouncement;
+          default:
+            return async () => {};
+        }
+      };
+
       return (
-        <form action="" className="p-4 flex flex-col gap-4">
+        <form action={getDeleteAction()} className="p-4 flex flex-col gap-4">
+          <input type="hidden" name="id" value={id} />
           <span className="text-center font-medium">
             All data will be lost. Are you sure you want to delete this {table}?
           </span>
@@ -200,7 +248,7 @@ const FormModal = ({
 
     if (type === "create" || type === "update") {
       const renderer = forms[table];
-      return renderer ? renderer(type, data) : <div>Form not found!</div>;
+      return renderer ? renderer(type, data, relatedData, setOpen) : <div>Form not found!</div>;
     }
 
     return <div>Form not found!</div>;
