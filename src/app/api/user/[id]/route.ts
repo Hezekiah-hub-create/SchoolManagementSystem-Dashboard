@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role");
-    const userId = params.id;
+    const { id } = await params;
+    const userId = id;
 
     let user: any = null;
     let roleSpecificData: any = {};
