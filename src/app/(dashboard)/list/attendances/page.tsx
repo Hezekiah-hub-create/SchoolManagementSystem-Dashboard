@@ -9,6 +9,9 @@ import { Attendance, Student, Lesson, Subject, Class, Teacher, Prisma } from "@p
 import Image from "next/image";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 
+export const dynamic = 'force-dynamic';
+
+
 type AttendanceList = Attendance & { student: Student } & { lesson: Lesson & { subject: Subject; class: Class; teachers: Teacher[] } };
 
 const AttendanceListPage = async ({ searchParams }: { searchParams: any }) => {

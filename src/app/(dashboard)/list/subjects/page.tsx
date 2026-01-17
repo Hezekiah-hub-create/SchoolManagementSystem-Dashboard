@@ -8,6 +8,8 @@ import { Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = 'force-dynamic';
+
 type SubjectList = Subject & { teachers: Teacher[] };
 
 const SubjectListPage = async ({ searchParams }: { searchParams: any }) => {

@@ -8,6 +8,9 @@ import { Class, Exam, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = 'force-dynamic';
+
+
 type ExamList = Exam & {
   lesson: {
     subject: Subject;

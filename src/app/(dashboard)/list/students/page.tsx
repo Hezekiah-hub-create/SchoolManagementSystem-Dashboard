@@ -11,6 +11,8 @@ import { Student, Class, Grade, Prisma } from "@prisma/client";
 import { ITEM_PER_PAGE_STUDENT } from "@/lib/settings";
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = 'force-dynamic';
+
 
 
 type StudentList = Student & { class: Class } & { grade: Grade };

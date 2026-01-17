@@ -8,6 +8,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { auth } from "@clerk/nextjs/server";
+
+export const dynamic = 'force-dynamic';
 import FormModal from "@/components/FormModal";
 
 type TeacherList = Teacher & { subjects: Subject[] } & { classes: Class[] };

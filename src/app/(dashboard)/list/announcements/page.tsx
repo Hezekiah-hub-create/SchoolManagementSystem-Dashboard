@@ -9,6 +9,8 @@ import Image from "next/image";
 import { ITEM_PER_PAGE } from "@/lib/settings"
 import { auth } from "@clerk/nextjs/server";
 
+export const dynamic = 'force-dynamic';
+
 type AnnouncementList = Announcement & { class?: Class | null };
 
 const AnnouncementListPage = async ({ searchParams }: { searchParams: any }) => {

@@ -8,6 +8,9 @@ import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
 import { Finance } from "@prisma/client";
+import { ITEM_PER_PAGE } from "@/lib/settings";
+
+export const dynamic = 'force-dynamic';
 
 type FinanceList = Finance;
 
