@@ -21,7 +21,6 @@ const { sessionClaims } = await auth();
 const role = (sessionClaims?.metadata as { role?: string })?.role;
 const userId = (sessionClaims?.sub as string);
 
-
 const columns = [
   {
     header: "Info",
@@ -85,6 +84,24 @@ const renderRow = (item: ParentList) => (
   // URL PARAMS CONDITION
 
   const query: Prisma.ParentWhereInput = {};
+
+  if (role === "teacher") {
+    query.students = {
+      some: {
+        class: {
+          lessons: {
+            some: {
+              teachers: {
+                some: {
+                  id: userId,
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
 
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {

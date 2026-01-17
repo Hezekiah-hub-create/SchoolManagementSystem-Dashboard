@@ -5,7 +5,7 @@
 - **Database Configuration**: Utilizes Prisma as an ORM with PostgreSQL as the database. The schema defines comprehensive models for educational entities including Admin, Student, Teacher, Parent, Grade, Class, Subject, Lesson, Exam, Assignment, Result, Attendance, Event, Announcement, Settings, Role, and UserRole.
 - **Dependencies**: Key libraries include React Hook Form for form handling, Zod for validation, Lucide React for icons, Recharts for data visualization, React Big Calendar for scheduling, and Clerk for authentication and user management.
 - **Project Structure**: Organized with Next.js app router, components for UI elements, forms for data entry, and lib for utilities. Includes pages for listing and managing various entities like students, teachers, classes, etc. Additional API routes for settings, announcements count, and welcome endpoints.
-- **Features Implemented**: Routes for managing announcements, students, teachers, subjects, classes, parents, results, messages, assignments, attendances, exams, events, lessons, and settings. Components for tables, pagination, search, forms, charts, and user role management. Role-based access control implemented with teacher and admin roles. Settings management system for configurable application parameters.
+- **Features Implemented**: Routes for managing announcements, students, teachers, subjects, classes, parents, results, messages, assignments, attendances, exams, events, lessons, and settings. Components for tables, pagination, search, forms, charts, and user role management. Role-based access control implemented with teacher and admin roles. Settings management system for configurable application parameters. Database schema updates including new models for Settings, Role, and UserRole. Additional API routes for settings, announcements count, and welcome endpoints.
 
 ## Logical Part Explanation
 The logical structure of the School Management System Dashboard is designed to efficiently manage educational data and operations. Here's the breakdown:
@@ -16,6 +16,8 @@ The logical structure of the School Management System Dashboard is designed to e
 - **Assessment System**: Exams and Assignments are linked to Lessons, with Results tracking student performance.
 - **Attendance Tracking**: Attendance records are associated with Lessons and Students for monitoring participation.
 - **Communication**: Announcements and Events are class-specific, while Messages might be for broader communication.
+- **Settings Management**: Settings model allows for configurable application parameters stored as JSON data.
+- **Role-Based Access Control**: Role and UserRole models implement flexible permission systems with JSON-based permissions.
 - **Enums**: UserSex and Day enums ensure data consistency.
 
 ### Application Architecture Logic

@@ -99,57 +99,6 @@ const SettingsPage = async () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold mb-4">Settings</h1>
 
-        {/* User Profile Section */}
-        <div className="flex items-center gap-4 mb-6">
-          <Image
-            src={user.img || "/noAvatar.png"}
-            alt="Avatar"
-            width={80}
-            height={80}
-            className="rounded-full"
-          />
-          <div>
-            <h2 className="text-xl font-semibold">
-              {user.name} {user.surname}
-            </h2>
-            <p className="text-gray-600 capitalize">{role}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Personal Information</h3>
-            <p><strong>Email:</strong> {user.email || "N/A"}</p>
-            <p><strong>Phone:</strong> {user.phone || "N/A"}</p>
-            <p><strong>Address:</strong> {user.address || "N/A"}</p>
-            <p><strong>Blood Type:</strong> {user.bloodType || "N/A"}</p>
-            <p><strong>Sex:</strong> {user.sex || "N/A"}</p>
-            <p><strong>Birthday:</strong> {user.birthday ? new Date(user.birthday).toLocaleDateString() : "N/A"}</p>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Role-Specific Information</h3>
-            {role === "student" && (
-              <>
-                <p><strong>Class:</strong> {roleSpecificData.class || "N/A"}</p>
-                <p><strong>Grade:</strong> {roleSpecificData.grade || "N/A"}</p>
-                <p><strong>Parent:</strong> {roleSpecificData.parent}</p>
-              </>
-            )}
-            {role === "teacher" && (
-              <>
-                <p><strong>Subjects:</strong> {roleSpecificData.subjects || "N/A"}</p>
-                <p><strong>Classes:</strong> {roleSpecificData.classes || "N/A"}</p>
-              </>
-            )}
-            {role === "parent" && (
-              <p><strong>Students:</strong> {roleSpecificData.students || "N/A"}</p>
-            )}
-            {role === "admin" && (
-              <p>No additional role-specific information.</p>
-            )}
-          </div>
-        </div>
-
         {/* Admin Settings Section */}
         {role === "admin" && (
           <div className="mt-8">

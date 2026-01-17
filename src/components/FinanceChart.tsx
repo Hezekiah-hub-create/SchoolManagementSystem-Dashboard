@@ -11,71 +11,49 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
-const data = [
-  {
-    name: "Jan",
-    income: 4000,
-    expense: 2400,
-  },
-  {
-    name: "Feb",
-    income: 3000,
-    expense: 1398,
-  },
-  {
-    name: "Mar",
-    income: 2000,
-    expense: 3000,
-  },
-  {
-    name: "Apr",
-    income: 2780,
-    expense: 3908,
-  },
-  {
-    name: "May",
-    income: 1890,
-    expense: 4800,
-  },
-  {
-    name: "Jun",
-    income: 2390,
-    expense: 3800,
-  },
-  {
-    name: "Jul",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Aug",
-    income: 5090,
-    expense: 2000,
-  },
-  {
-    name: "Sep",
-    income: 5000,
-    expense: 4300,
-  },
-  {
-    name: "Oct",
-    income: 4090,
-    expense: 3000,
-  },
-  {
-    name: "Nov",
-    income: 3490,
-    expense: 2500,
-  },
-  {
-    name: "Dec",
-    income: 3490,
-    expense: 4300,
-  },
-];
+import { useEffect, useState } from "react";
 
 const FinanceChart = () => {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/finances");
+        if (response.ok) {
+          const finances = await response.json();
+          // Process data to group by month
+          const monthlyData: { [key: string]: { income: number; expense: number } } = {};
+
+          finances.forEach((finance: any) => {
+            const date = new Date(finance.date);
+            const month = date.toLocaleString("default", { month: "short" });
+            if (!monthlyData[month]) {
+              monthlyData[month] = { income: 0, expense: 0 };
+            }
+            if (finance.type === "income") {
+              monthlyData[month].income += finance.amount;
+            } else if (finance.type === "expense") {
+              monthlyData[month].expense += finance.amount;
+            }
+          });
+
+          const chartData = Object.keys(monthlyData).map((month) => ({
+            name: month,
+            income: monthlyData[month].income,
+            expense: monthlyData[month].expense,
+          }));
+
+          setData(chartData);
+        }
+      } catch (error) {
+        console.error("Error fetching finance data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-white rounded-xl w-full h-full p-4">
       <div className="flex justify-between items-center">
@@ -102,7 +80,7 @@ const FinanceChart = () => {
             tickLine={false}
             tickMargin={10}
           />
-          <YAxis axisLine={false} tick={{ fill: "#000000ff" }} tickLine={false}  tickMargin={20}/>
+          <YAxis axisLine={false} tick={{ fill: "#000000ff" }} tickLine={false} tickMargin={20} />
           <Tooltip />
           <Legend
             align="center"
@@ -115,7 +93,7 @@ const FinanceChart = () => {
             stroke="#0d2249ff"
             strokeWidth={3}
           />
-          <Line type="monotone" dataKey="expense" stroke="#8a1818ff" strokeWidth={3}/>
+          <Line type="monotone" dataKey="expense" stroke="#8a1818ff" strokeWidth={3} />
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -10,6 +10,7 @@ import {
   EventSchema,
   EventFormSchema,
   ExamSchema,
+  FinanceSchema,
   LessonSchema,
   ParentSchema,
   ProfileUpdateSchema,
@@ -440,9 +441,9 @@ export const updateTeacher = async (
       };
     }
 
-    // Only update birthday if provided
-    if (data.birthday !== undefined) {
-      updateData.birthday = data.birthday ? new Date(data.birthday) : null;
+    // Only update birthday if provided and not empty
+    if (data.birthday !== undefined && String(data.birthday) !== "") {
+      updateData.birthday = new Date(data.birthday);
     }
 
     await prisma.teacher.update({
@@ -840,25 +841,53 @@ export const updateStudent = async (
       // If parent doesn't exist, validParentId remains null
     }
 
+    // Build update data object with only provided fields
+    const updateData: any = {
+      username: data.username,
+      name: data.name,
+      surname: data.surname,
+      address: data.address,
+      bloodType: data.bloodType,
+      sex: data.sex,
+      gradeId: data.gradeId,
+      classId: data.classId,
+    };
+
+    // Only update optional fields if they are provided and not empty
+    if (data.email !== undefined && data.email !== "") {
+      updateData.email = data.email;
+    } else {
+      updateData.email = null;
+    }
+
+    if (data.phone !== undefined && data.phone !== "") {
+      updateData.phone = data.phone;
+    } else {
+      updateData.phone = null;
+    }
+
+    // Only update image if provided
+    if (data.img !== undefined && data.img !== "") {
+      updateData.img = data.img;
+    } else {
+      updateData.img = null;
+    }
+
+    // Only update birthday if provided and not empty
+    if (data.birthday !== undefined && String(data.birthday) !== "") {
+      updateData.birthday = new Date(data.birthday);
+    }
+
+    // Only update parentId if provided
+    if (validParentId !== null) {
+      updateData.parentId = validParentId;
+    }
+
     await prisma.student.update({
       where: {
         id: data.id,
       },
-      data: {
-        username: data.username,
-        name: data.name,
-        surname: data.surname,
-        email: data.email || null,
-        phone: data.phone || null,
-        address: data.address,
-        img: data.img || null,
-        bloodType: data.bloodType,
-        sex: data.sex,
-        birthday: data.birthday ? new Date(data.birthday) : null,
-        gradeId: data.gradeId,
-        classId: data.classId,
-        parentId: validParentId,
-      },
+      data: updateData,
     });
     console.log('Student updated in database successfully');
     revalidatePath("/list/students");
@@ -1773,5 +1802,176 @@ export const updateParent = async (
       error: true,
       message: errorMessage
     };
+  }
+};
+
+export const updateProfile = async (
+  data: ProfileUpdateSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true, message: 'User ID is required' };
+  }
+
+  try {
+    // Determine the role and update the appropriate table
+    // Since we don't have role in the data, we need to find the user in one of the tables
+    let userTable = null;
+    let role = null;
+
+    // Check if user is a teacher
+    const teacher = await prisma.teacher.findUnique({
+      where: { id: data.id },
+    });
+    if (teacher) {
+      userTable = 'teacher';
+      role = 'teacher';
+    }
+
+    // Check if user is a student
+    if (!userTable) {
+      const student = await prisma.student.findUnique({
+        where: { id: data.id },
+      });
+      if (student) {
+        userTable = 'student';
+        role = 'student';
+      }
+    }
+
+    // Check if user is a parent
+    if (!userTable) {
+      const parent = await prisma.parent.findUnique({
+        where: { id: data.id },
+      });
+      if (parent) {
+        userTable = 'parent';
+        role = 'parent';
+      }
+    }
+
+    if (!userTable) {
+      return { success: false, error: true, message: 'User not found' };
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      name: data.name,
+      surname: data.surname,
+      address: data.address,
+      bloodType: data.bloodType,
+      sex: data.sex,
+    };
+
+    // Handle optional fields
+    if (data.email !== undefined && data.email !== "") {
+      updateData.email = data.email;
+    } else {
+      updateData.email = null;
+    }
+
+    if (data.phone !== undefined && data.phone !== "") {
+      updateData.phone = data.phone;
+    } else {
+      updateData.phone = null;
+    }
+
+    if (data.img !== undefined && data.img !== "") {
+      updateData.img = data.img;
+    } else {
+      updateData.img = null;
+    }
+
+    if (data.birthday !== undefined && String(data.birthday) !== "") {
+      updateData.birthday = new Date(data.birthday);
+    }
+
+    // Update the appropriate table
+    if (userTable === 'teacher') {
+      await prisma.teacher.update({
+        where: { id: data.id },
+        data: updateData,
+      });
+    } else if (userTable === 'student') {
+      await prisma.student.update({
+        where: { id: data.id },
+        data: updateData,
+      });
+    } else if (userTable === 'parent') {
+      await prisma.parent.update({
+        where: { id: data.id },
+        data: updateData,
+      });
+    }
+
+    revalidatePath("/profile");
+    return { success: true, error: false, message: "Profile updated successfully" };
+  } catch (err: any) {
+    console.error('Error updating profile:', err);
+    return { success: false, error: true, message: err.message || "Failed to update profile" };
+  }
+};
+
+export const createFinance = async (
+  data: FinanceSchema
+) => {
+  try {
+    await prisma.finance.create({
+      data: {
+        type: data.type,
+        amount: data.amount,
+        description: data.description,
+        date: new Date(data.date),
+      },
+    });
+
+    revalidatePath("/list/finances");
+    return { success: true, error: false, message: "Finance record created successfully" };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};
+
+export const updateFinance = async (
+  data: FinanceSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true, message: 'Finance ID is required' };
+  }
+
+  try {
+    await prisma.finance.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        type: data.type,
+        amount: data.amount,
+        description: data.description,
+        date: new Date(data.date),
+      },
+    });
+
+    revalidatePath("/list/finances");
+    return { success: true, error: false, message: "Finance record updated successfully" };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};
+
+export const deleteFinance = async (data: FormData) => {
+  const id = data.get("id") as string;
+  try {
+    await prisma.finance.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    revalidatePath("/list/finances");
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to delete finance record");
   }
 };

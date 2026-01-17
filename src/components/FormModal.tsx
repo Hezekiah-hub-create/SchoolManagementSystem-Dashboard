@@ -18,6 +18,7 @@ import {
   deleteAttendance,
   deleteEvent,
   deleteAnnouncement,
+  deleteFinance,
 } from "@/lib/actions";
 
 // dynamic imports for forms
@@ -33,6 +34,8 @@ const ResultForm = dynamic(() => import("./forms/ResultForm"));
 const AttendanceForm = dynamic(() => import("./forms/AttendanceForm"));
 const EventForm = dynamic(() => import("./forms/EventForm"));
 const AnnouncementForm = dynamic(() => import("./forms/AnnouncementForm"));
+const FinanceForm = dynamic(() => import("./forms/FinanceForm"));
+const SettingsForm = dynamic(() => import("./forms/SettingsForm"));
 
 const forms: {
   [key: string]: (type: "create" | "update", data: any, relatedData: any, setOpen: Dispatch<SetStateAction<boolean>>) => JSX.Element;
@@ -49,6 +52,8 @@ const forms: {
   attendance: (type, data, relatedData, setOpen) => <AttendanceForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
   event: (type, data, relatedData, setOpen) => <EventForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
   announcement: (type, data, relatedData, setOpen) => <AnnouncementForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  finance: (type, data, relatedData, setOpen) => <FinanceForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+  settings: (type, data, relatedData, setOpen) => <SettingsForm type={type} data={data} setOpen={setOpen} category={relatedData} />,
 };
 
 const FormModal = ({
@@ -57,6 +62,7 @@ const FormModal = ({
   data,
   id,
   relatedData,
+  children,
 }: {
   table:
     | "teacher"
@@ -70,11 +76,14 @@ const FormModal = ({
     | "result"
     | "attendance"
     | "event"
-    | "announcement";
+    | "announcement"
+    | "finance"
+    | "settings";
   type: "create" | "update" | "delete" | "view";
   data?: any;
   id?: string | number;
   relatedData?: any;
+  children?: React.ReactNode;
 }) => {
   const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor = "bg-ZekPurple";
@@ -125,6 +134,8 @@ const FormModal = ({
             return deleteEvent;
           case "announcement":
             return deleteAnnouncement;
+          case "finance":
+            return deleteFinance;
           default:
             return async () => {};
         }
@@ -256,20 +267,36 @@ const FormModal = ({
 
   return (
     <>
-      <button
-        className={`${size} flex items-center justify-center rounded-full ${bgColor} text-white`}
-        onClick={async () => {
-          if (type === "view" || type === "create") {
-            setIsLoading(true);
-            // Simulate loading delay with shorter duration
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            setIsLoading(false);
-          }
-          setOpen(true);
-        }}
-      >
-        {getIcon()}
-      </button>
+      {children ? (
+        <div
+          onClick={async () => {
+            if (type === "view" || type === "create") {
+              setIsLoading(true);
+              // Simulate loading delay with shorter duration
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              setIsLoading(false);
+            }
+            setOpen(true);
+          }}
+        >
+          {children}
+        </div>
+      ) : (
+        <button
+          className={`${size} flex items-center justify-center rounded-full ${bgColor} text-white`}
+          onClick={async () => {
+            if (type === "view" || type === "create") {
+              setIsLoading(true);
+              // Simulate loading delay with shorter duration
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              setIsLoading(false);
+            }
+            setOpen(true);
+          }}
+        >
+          {getIcon()}
+        </button>
+      )}
       {isLoading && <LoadingSpinner />}
       {open && (
         <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">

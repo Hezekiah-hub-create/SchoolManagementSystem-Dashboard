@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Image from "next/image";
+import FormModal from "@/components/FormModal";
+import ProfileForm from "@/components/forms/ProfileForm";
 
 const ProfilePage = async () => {
   const { userId, sessionClaims } = await auth();

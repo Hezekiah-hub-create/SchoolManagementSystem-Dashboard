@@ -9,6 +9,7 @@ type InputFieldProps = {
   error?: any;
   hidden?: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  step?: string;
 };
 
 const InputField = ({

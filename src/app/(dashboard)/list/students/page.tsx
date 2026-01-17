@@ -101,38 +101,10 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
   // URL PARAMS CONDITION
   const query: Prisma.StudentWhereInput = {}
 
-  // Apply teacher filter if role is teacher
-  if (role === "teacher") {
-    query.class = {
-      lessons: {
-        some: {
-          teachers: {
-            some: {
-              id: userId,
-            },
-          },
-      },
-    },
-    };
-  }
-
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
         switch (key) {
-          case "teacherId":
-            query.class = {
-              lessons: {
-        some: {
-          teachers: {
-            some: {
-              id: userId,
-            },
-          },
-      },
-    },
-            };
-            break;
           case "search":
             query.name = { contains: value as string, mode: "insensitive" };
             break;
@@ -141,6 +113,33 @@ const StudentListPage = async ({ searchParams }: { searchParams: any }) => {
         }
       }
     }
+  }
+
+  // ROLE CONDITIONS
+  switch (role) {
+    case "admin":
+      break;
+    case "teacher":
+      query.class = {
+        lessons: {
+          some: {
+            teachers: {
+              some: {
+                id: userId!,
+              },
+            },
+          },
+        },
+      };
+      break;
+    case "student":
+      query.id = userId!;
+      break;
+    case "parent":
+      query.parentId = userId!;
+      break;
+    default:
+      break;
   }
 
   const [data, count] = await prisma.$transaction([

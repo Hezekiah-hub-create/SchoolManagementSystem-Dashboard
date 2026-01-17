@@ -155,20 +155,22 @@ const ParentForm = ({
           register={register}
           error={errors?.birthday}
         />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 w-full">
           <label className="text-xs text-gray-500">Students</label>
-          <select
-            multiple
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("students")}
-            defaultValue={data?.students}
-          >
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 p-2 border border-gray-300 rounded-md max-h-32 overflow-y-auto">
             {relatedData?.students?.map((student: { id: string; name: string; surname: string }) => (
-              <option value={student.id} key={student.id}>
+              <label key={student.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  value={student.id}
+                  {...register("students")}
+                  defaultChecked={data?.students?.includes(student.id)}
+                  className="w-4 h-4"
+                />
                 {student.name} {student.surname}
-              </option>
+              </label>
             ))}
-          </select>
+          </div>
           {errors.students?.message && (
             <p className="text-xs text-red-400">
               {errors.students.message.toString()}

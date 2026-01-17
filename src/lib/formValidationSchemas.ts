@@ -272,6 +272,19 @@ export const announcementFormSchema = z.object({
 
 export type AnnouncementFormSchema = z.infer<typeof announcementFormSchema>;
 
+export const profileFormSchema = z.object({
+  name: z.string().min(1, { message: "Name is required!" }),
+  surname: z.string().min(1, { message: "Surname is required!" }),
+  email: z.string().email({ message: "Invalid email address!" }).optional().or(z.literal("")),
+  phone: z.string().optional(),
+  address: z.string().min(1, { message: "Address is required!" }),
+  bloodType: z.string().min(1, { message: "Blood Type is required!" }),
+  birthday: z.string().optional(),
+  sex: z.enum(["MALE", "FEMALE"], { message: "Sex is required!" }),
+});
+
+export type ProfileFormSchema = z.infer<typeof profileFormSchema>;
+
 export const profileUpdateSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, { message: "Name is required!" }),
@@ -290,5 +303,25 @@ export const profileUpdateSchema = z.object({
   subjects: z.array(z.string()).optional(),
   students: z.array(z.string()).optional(),
 });
+
+export const financeSchema = z.object({
+  id: z.coerce.number().optional(),
+  type: z.enum(["income", "expense"], { message: "Type is required!" }),
+  amount: z.coerce.number().min(0.01, { message: "Amount must be greater than 0!" }),
+  description: z.string().min(1, { message: "Description is required!" }),
+  date: z.coerce.date({ message: "Date is required!" }),
+});
+
+export type FinanceSchema = z.infer<typeof financeSchema>;
+
+export const financeFormSchema = z.object({
+  id: z.coerce.number().optional(),
+  type: z.enum(["income", "expense"], { message: "Type is required!" }),
+  amount: z.string().min(1, { message: "Amount is required!" }),
+  description: z.string().min(1, { message: "Description is required!" }),
+  date: z.string().min(1, { message: "Date is required!" }),
+});
+
+export type FinanceFormSchema = z.infer<typeof financeFormSchema>;
 
 export type ProfileUpdateSchema = z.infer<typeof profileUpdateSchema>;

@@ -209,6 +209,16 @@ model UserRole {
   @@unique([userId, roleId])
 }
 
+model Finance {
+  id          Int      @id @default(autoincrement())
+  type        String   // 'income' or 'expense'
+  amount      Float
+  description String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum UserSex {
   MALE
   FEMALE

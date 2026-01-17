@@ -116,7 +116,13 @@ const renderRow = (item: ExamList) => (
     case "admin":
       break;
     case "teacher":
-      query.lesson.teachers = { some: { id: currentUserId! } };
+      query.lesson = {
+        teachers: {
+          some: {
+            id: currentUserId!,
+          },
+        },
+      };
       break;
     case "student":
       query.lesson.class = {

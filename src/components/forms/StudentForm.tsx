@@ -41,15 +41,11 @@ const StudentForm = ({
     resolver: zodResolver(type === "create" ? studentCreateSchema : studentSchema) as any,
     defaultValues: {
       ...data,
-      birthday: data?.birthday
-        ? (typeof data.birthday === "string" || typeof data.birthday === "number"
-            ? new Date(data.birthday)
-            : data.birthday)
-        : undefined,
+      birthday: data?.birthday ? new Date(data.birthday).toISOString().split("T")[0] : "",
     } as Partial<StudentSchema>,
   });
 
-  const [img, setImg] = useState<any>();
+  const [img, setImg] = useState<any>(data?.img ? { secure_url: data.img } : undefined);
   const [state, setState] = useState({ success: false, error: false, message: "" });
   const [isPending, startTransition] = useTransition();
 
@@ -208,8 +204,9 @@ const StudentForm = ({
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("sex")}
-            defaultValue={data?.sex}
+            defaultValue={data?.sex || ""}
           >
+            <option value="" disabled>Select Sex</option>
             <option value="MALE">Male</option>
             <option value="FEMALE">Female</option>
           </select>
@@ -224,8 +221,9 @@ const StudentForm = ({
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("gradeId")}
-            defaultValue={data?.gradeId}
+            defaultValue={data?.gradeId || ""}
           >
+            <option value="" disabled>Select Grade</option>
             {grades.map((grade: { id: number; level: number }) => (
               <option value={grade.id} key={grade.id}>
                 {grade.level}
@@ -243,8 +241,9 @@ const StudentForm = ({
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("classId")}
-            defaultValue={data?.classId}
+            defaultValue={data?.classId || ""}
           >
+            <option value="" disabled>Select Class</option>
             {classes.map(
               (classItem: {
                 id: number;

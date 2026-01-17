@@ -30,11 +30,7 @@ const TeacherForm = ({
    resolver: zodResolver(type === "create" ? teacherCreateSchema : teacherSchema) as any,
     defaultValues: {
       ...data,
-      birthday: data?.birthday
-        ? (typeof data.birthday === "string" || typeof data.birthday === "number"
-            ? new Date(data.birthday)
-            : data.birthday)
-        : undefined,
+      birthday: data?.birthday ? new Date(data.birthday).toISOString().split("T")[0] : "",
     } as Partial<TeacherSchema>,
   });
 
@@ -164,8 +160,9 @@ const TeacherForm = ({
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("sex")}
-            defaultValue={data?.sex}
+            defaultValue={data?.sex || ""}
           >
+            <option value="" disabled>Select Sex</option>
             <option value="MALE">Male</option>
             <option value="FEMALE">Female</option>
           </select>
@@ -181,7 +178,7 @@ const TeacherForm = ({
             multiple
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("subjects")}
-            defaultValue={data?.subjects}
+            defaultValue={data?.subjects?.map((s: any) => s.id || s) || []}
           >
             {subjects.map((subject: { id: number; name: string }) => (
               <option value={subject.id} key={subject.id}>

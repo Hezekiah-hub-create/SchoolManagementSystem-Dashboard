@@ -92,6 +92,12 @@ const menuItems = [
         href: "/list/announcements",
         visible: ["admin", "teacher", "student", "parent"],
       },
+      {
+        icon: "/finance.png",
+        label: "Finances",
+        href: "/list/finances",
+        visible: ["admin"],
+      },
     ],
   },
   {
