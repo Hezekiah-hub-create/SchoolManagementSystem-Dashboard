@@ -1,0 +1,3 @@
+- [x] Fix the COPY line in Dockerfile to properly copy prisma directory
+- [ ] Rebuild Docker containers using docker-compose build (failed due to TLS handshake timeout - network issue)
+- [ ] Run the Prisma migration command: docker-compose exec app npx prisma migrate deploy --schema prisma/schema.prisma
