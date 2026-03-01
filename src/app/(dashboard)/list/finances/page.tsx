@@ -50,7 +50,7 @@ const renderRow = (item: FinanceList) => (
         <h3 className="font-semibold capitalize">{item.type}</h3>
       </div>
     </td>
-    <td className="hidden md:table-cell">${item.amount.toFixed(2)}</td>
+    <td className="hidden md:table-cell">¢{item.amount.toFixed(2)}</td>
     <td className="hidden md:table-cell">{item.description}</td>
     <td className="hidden lg:table-cell">
       {new Date(item.date).toLocaleDateString()}

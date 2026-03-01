@@ -325,3 +325,139 @@ export const financeFormSchema = z.object({
 export type FinanceFormSchema = z.infer<typeof financeFormSchema>;
 
 export type ProfileUpdateSchema = z.infer<typeof profileUpdateSchema>;
+
+// ==================== BILLING & INVOICE SCHEMAS ====================
+
+export const invoiceItemSchema = z.object({
+  description: z.string().min(1, { message: "Description is required!" }),
+  amount: z.coerce.number().min(0.01, { message: "Amount must be greater than 0!" }),
+  quantity: z.coerce.number().min(1, { message: "Quantity must be at least 1!" }),
+});
+
+export const invoiceSchema = z.object({
+  id: z.string().optional(),
+  studentId: z.string().min(1, { message: "Student is required!" }),
+  items: z.array(invoiceItemSchema).min(1, { message: "At least one item is required!" }),
+  totalAmount: z.coerce.number().min(0, { message: "Total amount is required!" }),
+  dueDate: z.string().min(1, { message: "Due date is required!" }),
+});
+
+export type InvoiceSchema = z.infer<typeof invoiceSchema>;
+
+export const paymentSchema = z.object({
+  id: z.string().optional(),
+  invoiceId: z.string().min(1, { message: "Invoice is required!" }),
+  amount: z.coerce.number().min(0.01, { message: "Amount must be greater than 0!" }),
+  paymentMethod: z.enum(["CASH", "MOBILE_MONEY", "BANK_TRANSFER", "CARD"], { 
+    message: "Payment method is required!" 
+  }),
+  transactionId: z.string().optional(),
+  reference: z.string().optional(),
+});
+
+export type PaymentSchema = z.infer<typeof paymentSchema>;
+
+// ==================== SCHEME OF LEARNING SCHEMAS ====================
+
+export const weekTopicSchema = z.object({
+  week: z.number().min(1),
+  topic: z.string().min(1, { message: "Topic is required!" }),
+  subtopics: z.array(z.string()).optional(),
+  resources: z.array(z.string()).optional(),
+});
+
+export const schemeOfLearningSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, { message: "Title is required!" }),
+  subjectId: z.coerce.number().min(1, { message: "Subject is required!" }),
+  classId: z.coerce.number().min(1, { message: "Class is required!" }),
+  teacherId: z.string().optional(),
+  term: z.string().min(1, { message: "Term is required!" }),
+  year: z.coerce.number().min(2020, { message: "Valid year is required!" }),
+  weeks: z.array(weekTopicSchema).optional(),
+  objectives: z.string().min(1, { message: "Objectives are required!" }),
+});
+
+export type SchemeOfLearningSchema = z.infer<typeof schemeOfLearningSchema>;
+
+// ==================== CURRICULUM SCHEMAS ====================
+
+export const curriculumTopicSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, { message: "Topic name is required!" }),
+  description: z.string().optional(),
+  subtopics: z.array(z.string()).optional(),
+  duration: z.number().optional(), // in weeks
+});
+
+export const curriculumSchema = z.object({
+  id: z.string().optional(),
+  subjectId: z.coerce.number().min(1, { message: "Subject is required!" }),
+  gradeId: z.coerce.number().min(1, { message: "Grade is required!" }),
+  topics: z.array(curriculumTopicSchema).optional(),
+  objectives: z.string().min(1, { message: "Objectives are required!" }),
+  outcomes: z.string().min(1, { message: "Outcomes are required!" }),
+});
+
+export type CurriculumSchema = z.infer<typeof curriculumSchema>;
+
+// ==================== MESSAGE SCHEMAS ====================
+
+export const messageSchema = z.object({
+  id: z.string().optional(),
+  senderId: z.string().optional(),
+  senderType: z.enum(["ADMIN", "TEACHER", "STUDENT", "PARENT"]).optional(),
+  receiverId: z.string().min(1, { message: "Receiver is required!" }),
+  receiverType: z.enum(["ADMIN", "TEACHER", "STUDENT", "PARENT"], { 
+    message: "Receiver type is required!" 
+  }),
+  subject: z.string().min(1, { message: "Subject is required!" }),
+  content: z.string().min(1, { message: "Message content is required!" }),
+});
+
+export type MessageSchema = z.infer<typeof messageSchema>;
+
+// ==================== SUPPORT TICKET SCHEMAS ====================
+
+export const ticketResponseSchema = z.object({
+  content: z.string().min(1, { message: "Response content is required!" }),
+});
+
+export const supportTicketSchema = z.object({
+  id: z.string().optional(),
+  category: z.enum(["TECHNICAL", "ACADEMIC", "FINANCIAL", "ADMINISTRATIVE", "OTHER"], { 
+    message: "Category is required!" 
+  }),
+  subject: z.string().min(1, { message: "Subject is required!" }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters!" }),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+  status: z.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]).optional(),
+});
+
+export type SupportTicketSchema = z.infer<typeof supportTicketSchema>;
+
+// ==================== ACADEMIC REPORT SCHEMAS ====================
+
+export const subjectScoreSchema = z.object({
+  subjectId: z.number(),
+  subjectName: z.string(),
+  score: z.number().min(0).max(100),
+  grade: z.string().optional(),
+  comment: z.string().optional(),
+});
+
+export const academicReportSchema = z.object({
+  id: z.string().optional(),
+  studentId: z.string().min(1, { message: "Student is required!" }),
+  term: z.string().min(1, { message: "Term is required!" }),
+  academicYear: z.coerce.number().min(2020, { message: "Valid year is required!" }),
+  averageScore: z.coerce.number().min(0).max(100).optional(),
+  classPosition: z.coerce.number().optional(),
+  gradePosition: z.coerce.number().optional(),
+  attendanceRate: z.coerce.number().min(0).max(100).optional(),
+  teacherComments: z.string().optional(),
+  principalComments: z.string().optional(),
+  subjects: z.array(subjectScoreSchema).optional(),
+});
+
+export type AcademicReportSchema = z.infer<typeof academicReportSchema>;

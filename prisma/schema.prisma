@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Admin {
@@ -13,44 +13,48 @@ model Admin {
 }
 
 model Student {
-  id          String       @id
-  username    String       @unique
-  name        String
-  surname     String
-  email       String?      @unique
-  phone       String?      @unique
-  address     String
-  img         String?
-  bloodType   String
-  sex         UserSex
-  birthday    DateTime?
-  createdAt   DateTime     @default(now())
-  parentId    String?
-  parent      Parent?      @relation(fields: [parentId], references: [id])
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
-  gradeId     Int
-  grade       Grade        @relation(fields: [gradeId], references: [id])
-  attendances Attendance[]
-  results     Result[]
+  id              String           @id
+  username        String           @unique
+  name            String
+  surname         String
+  email           String?          @unique
+  phone           String?          @unique
+  address         String
+  img             String?
+  bloodType       String
+  sex             UserSex
+  birthday        DateTime?
+  createdAt       DateTime         @default(now())
+  parentId        String?
+  parent          Parent?          @relation(fields: [parentId], references: [id])
+  classId         Int
+  class           Class            @relation(fields: [classId], references: [id])
+  gradeId         Int
+  grade           Grade            @relation(fields: [gradeId], references: [id])
+  attendances     Attendance[]
+  results         Result[]
+  invoices        Invoice[]
+  academicReports AcademicReport[]
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  img       String?
-  bloodType String
-  sex       UserSex
-  birthday  DateTime?
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]  @relation("LessonTeacher")
-  classes   Class[]
+  id                String             @id
+  username          String             @unique
+  name              String
+  surname           String
+  email             String?            @unique
+  phone             String?            @unique
+  address           String
+  img               String?
+  bloodType         String
+  sex               UserSex
+  birthday          DateTime?
+  createdAt         DateTime           @default(now())
+  subjects          Subject[]
+  lessons           Lesson[]           @relation("LessonTeacher")
+  classes           Class[]
+  schemesOfLearning SchemeOfLearning[]
+  payments          Payment[]
 }
 
 model Parent {
@@ -67,14 +71,16 @@ model Parent {
   birthday  DateTime?
   createdAt DateTime  @default(now())
   students  Student[]
+  messages  Message[]
 }
 
 model Grade {
   id    Int @id @default(autoincrement())
   level Int @unique
 
-  students Student[]
-  classess Class[]
+  students  Student[]
+  classess  Class[]
+  curricula Curriculum[]
 }
 
 model Class {
@@ -82,21 +88,24 @@ model Class {
   name     String @unique
   capacity Int
 
-  supervisorId  String?
-  supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
-  lessons       Lesson[]
-  students      Student[]
-  gradeId       Int
-  grade         Grade          @relation(fields: [gradeId], references: [id])
-  events        Event[]
-  announcements Announcement[]
+  supervisorId      String?
+  supervisor        Teacher?           @relation(fields: [supervisorId], references: [id])
+  lessons           Lesson[]
+  students          Student[]
+  gradeId           Int
+  grade             Grade              @relation(fields: [gradeId], references: [id])
+  events            Event[]
+  announcements     Announcement[]
+  schemeOfLearnings SchemeOfLearning[]
 }
 
 model Subject {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  teachers Teacher[]
-  lessons  Lesson[]
+  id                Int                @id @default(autoincrement())
+  name              String             @unique
+  teachers          Teacher[]
+  lessons           Lesson[]
+  schemeOfLearnings SchemeOfLearning[]
+  curricula         Curriculum[]
 }
 
 model Lesson {
@@ -183,27 +192,27 @@ model Announcement {
 }
 
 model Settings {
-  id       Int      @id @default(autoincrement())
-  category String   @unique
-  data     Json
+  id        Int      @id @default(autoincrement())
+  category  String   @unique
+  data      Json
   updatedAt DateTime @updatedAt
 }
 
 model Role {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
   permissions Json
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   userRoles   UserRole[]
 }
 
 model UserRole {
-  id     Int     @id @default(autoincrement())
-  userId String
-  roleId Int
-  role   Role    @relation(fields: [roleId], references: [id])
+  id         Int      @id @default(autoincrement())
+  userId     String
+  roleId     Int
+  role       Role     @relation(fields: [roleId], references: [id])
   assignedAt DateTime @default(now())
 
   @@unique([userId, roleId])
@@ -211,7 +220,7 @@ model UserRole {
 
 model Finance {
   id          Int      @id @default(autoincrement())
-  type        String   // 'income' or 'expense'
+  type        String // 'income' or 'expense'
   amount      Float
   description String
   date        DateTime @default(now())
@@ -230,4 +239,204 @@ enum Day {
   WEDNESDAY
   THURSDAY
   FRIDAY
+}
+
+// ==================== BILLING & FINANCE ====================
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  studentId     String
+  student       Student       @relation(fields: [studentId], references: [id])
+  items         InvoiceItem[]
+  totalAmount   Float
+  paidAmount    Float         @default(0)
+  status        InvoiceStatus @default(PENDING)
+  dueDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  payments      Payment[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  amount      Float
+  quantity    Int     @default(1)
+}
+
+enum InvoiceStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  amount        Float
+  paymentMethod PaymentMethod
+  transactionId String?
+  reference     String        @unique
+  recordedById  String
+  recordedBy    Teacher       @relation(fields: [recordedById], references: [id])
+  createdAt     DateTime      @default(now())
+}
+
+enum PaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+}
+
+// ==================== SCHEMES OF LEARNING ====================
+
+model SchemeOfLearning {
+  id         String   @id @default(cuid())
+  title      String
+  subjectId  Int
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  classId    Int
+  class      Class    @relation(fields: [classId], references: [id])
+  teacherId  String
+  teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  term       String
+  year       Int
+  weeks      Json // Weekly breakdown of topics
+  objectives String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ==================== CURRICULUM ====================
+
+model Curriculum {
+  id         String   @id @default(cuid())
+  subjectId  Int
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  gradeId    Int
+  grade      Grade    @relation(fields: [gradeId], references: [id])
+  topics     Json // Hierarchical topic structure
+  objectives String   @db.Text
+  outcomes   String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ==================== PARENT-TEACHER COMMUNICATION ====================
+
+model Message {
+  id           String   @id @default(cuid())
+  senderId     String
+  senderType   UserType
+  receiverId   String
+  receiverType UserType
+  subject      String
+  content      String   @db.Text
+  isRead       Boolean  @default(false)
+  parentId     String?
+  parent       Parent?  @relation(fields: [parentId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+enum UserType {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+// ==================== ACADEMIC REPORTS ====================
+
+model AcademicReport {
+  id                String   @id @default(cuid())
+  studentId         String
+  student           Student  @relation(fields: [studentId], references: [id])
+  term              String
+  academicYear      Int
+  averageScore      Float
+  classPosition     Int?
+  gradePosition     Int?
+  attendanceRate    Float
+  teacherComments   String   @db.Text
+  principalComments String?  @db.Text
+  generatedAt       DateTime @default(now())
+  subjects          Json // Subject-wise breakdown
+}
+
+// ==================== SUPPORT SYSTEM ====================
+
+model SupportTicket {
+  id          String           @id @default(cuid())
+  userId      String
+  userType    UserType
+  category    SupportCategory
+  subject     String
+  description String           @db.Text
+  status      TicketStatus     @default(OPEN)
+  priority    Priority         @default(MEDIUM)
+  assignedTo  String?
+  responses   TicketResponse[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  resolvedAt  DateTime?
+}
+
+model TicketResponse {
+  id            String        @id @default(cuid())
+  ticketId      String
+  ticket        SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  responderId   String
+  responderType UserType
+  content       String        @db.Text
+  createdAt     DateTime      @default(now())
+}
+
+enum SupportCategory {
+  TECHNICAL
+  ACADEMIC
+  FINANCIAL
+  ADMINISTRATIVE
+  OTHER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ==================== AUTOMATED REMINDERS ====================
+
+model ReminderLog {
+  id            String       @id @default(cuid())
+  type          ReminderType
+  recipientId   String
+  recipientType UserType
+  subject       String
+  message       String       @db.Text
+  sentAt        DateTime     @default(now())
+  status        String // SENT, FAILED
+}
+
+enum ReminderType {
+  FEE_DUE
+  PAYMENT_RECEIVED
+  ATTENDANCE
+  ACADEMIC_REPORT
+  GENERAL
 }

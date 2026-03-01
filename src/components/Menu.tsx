@@ -98,6 +98,42 @@ const menuItems = [
         href: "/list/finances",
         visible: ["admin"],
       },
+      {
+        icon: "/invoice.png",
+        label: "Invoices",
+        href: "/list/invoices",
+        visible: ["admin", "parent"],
+      },
+      {
+        icon: "/payment.png",
+        label: "Payments",
+        href: "/list/payments",
+        visible: ["admin", "parent"],
+      },
+      {
+        icon: "/lesson.png",
+        label: "Schemes",
+        href: "/list/schemes",
+        visible: ["admin", "teacher"],
+      },
+      {
+        icon: "/book.png",
+        label: "Curriculum",
+        href: "/list/curriculum",
+        visible: ["admin", "teacher"],
+      },
+      {
+        icon: "/result.png",
+        label: "Reports",
+        href: "/list/reports",
+        visible: ["admin", "teacher", "parent"],
+      },
+      {
+        icon: "/support.png",
+        label: "Support",
+        href: "/list/support",
+        visible: ["admin", "teacher", "student", "parent"],
+      },
     ],
   },
   {

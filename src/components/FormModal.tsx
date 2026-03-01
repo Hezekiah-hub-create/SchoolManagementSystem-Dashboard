@@ -78,7 +78,12 @@ const FormModal = ({
     | "event"
     | "announcement"
     | "finance"
-    | "settings";
+    | "settings"
+    | "invoice"
+    | "scheme"
+    | "message"
+    | "report"
+    | "support";
   type: "create" | "update" | "delete" | "view";
   data?: any;
   id?: string | number;

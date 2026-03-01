@@ -916,6 +916,217 @@ export const announcementsData = [
 ];
 
 
+// INVOICES DATA
+export const invoicesData = [
+  {
+    id: 1,
+    invoiceNumber: "INV-2025-0001",
+    student: "John Doe",
+    parent: "John Parent",
+    amount: 500.00,
+    status: "PENDING",
+    dueDate: "2025-03-15",
+    createdAt: "2025-02-01",
+  },
+  {
+    id: 2,
+    invoiceNumber: "INV-2025-0002",
+    student: "Jane Doe",
+    parent: "Jane Parent",
+    amount: 750.00,
+    status: "PAID",
+    dueDate: "2025-03-01",
+    createdAt: "2025-02-01",
+  },
+  {
+    id: 3,
+    invoiceNumber: "INV-2025-0003",
+    student: "Mike Geller",
+    parent: "Mike Parent",
+    amount: 300.00,
+    status: "OVERDUE",
+    dueDate: "2025-01-15",
+    createdAt: "2025-01-01",
+  },
+  {
+    id: 4,
+    invoiceNumber: "INV-2025-0004",
+    student: "Jay French",
+    parent: "Jay Parent",
+    amount: 600.00,
+    status: "PENDING",
+    dueDate: "2025-04-01",
+    createdAt: "2025-02-15",
+  },
+  {
+    id: 5,
+    invoiceNumber: "INV-2025-0005",
+    student: "Jane Smith",
+    parent: "Jane Parent",
+    amount: 450.00,
+    status: "PAID",
+    dueDate: "2025-02-28",
+    createdAt: "2025-02-01",
+  },
+];
+
+// PAYMENTS DATA
+export const paymentsData = [
+  {
+    id: 1,
+    invoiceNumber: "INV-2025-0002",
+    student: "Jane Doe",
+    amount: 750.00,
+    paymentMethod: "MOBILE_MONEY",
+    reference: "PAY-20250201123456",
+    recordedBy: "Admin User",
+    createdAt: "2025-02-10",
+  },
+  {
+    id: 2,
+    invoiceNumber: "INV-2025-0005",
+    student: "Jane Smith",
+    amount: 450.00,
+    paymentMethod: "BANK_TRANSFER",
+    reference: "PAY-20250215123456",
+    recordedBy: "Admin User",
+    createdAt: "2025-02-20",
+  },
+];
+
+// SCHEMES OF LEARNING DATA
+export const schemesData = [
+  {
+    id: 1,
+    title: "Mathematics Term 1",
+    subject: "Mathematics",
+    class: "5A",
+    teacher: "John Doe",
+    term: "Term 1",
+    year: 2025,
+  },
+  {
+    id: 2,
+    title: "English Literature Term 1",
+    subject: "English",
+    class: "5A",
+    teacher: "Jane Doe",
+    term: "Term 1",
+    year: 2025,
+  },
+  {
+    id: 3,
+    title: "Physics Term 1",
+    subject: "Physics",
+    class: "6A",
+    teacher: "Mike Geller",
+    term: "Term 1",
+    year: 2025,
+  },
+];
+
+// CURRICULUM DATA
+export const curriculumData = [
+  {
+    id: 1,
+    subject: "Mathematics",
+    grade: 5,
+    topics: ["Number Sense", "Algebra", "Geometry", "Data Handling"],
+    objectives: "Students will understand basic mathematical operations",
+    outcomes: "Apply mathematical concepts in real-world situations",
+  },
+  {
+    id: 2,
+    subject: "English",
+    grade: 5,
+    topics: ["Reading Comprehension", "Writing", "Grammar", "Vocabulary"],
+    objectives: "Develop English language skills",
+    outcomes: "Communicate effectively in English",
+  },
+  {
+    id: 3,
+    subject: "Science",
+    grade: 5,
+    topics: ["Living Things", "Materials", "Energy", "Earth Science"],
+    objectives: "Understand basic scientific concepts",
+    outcomes: "Apply scientific method in investigations",
+  },
+];
+
+// MESSAGES DATA
+export const messagesData = [
+  {
+    id: 1,
+    from: "John Parent",
+    fromType: "PARENT",
+    to: "Jane Teacher",
+    toType: "TEACHER",
+    subject: "Question about homework",
+    content: "Hello, I have a question about my child's homework assignment.",
+    isRead: false,
+    createdAt: "2025-02-15",
+  },
+  {
+    id: 2,
+    from: "Jane Teacher",
+    fromType: "TEACHER",
+    to: "John Parent",
+    toType: "PARENT",
+    subject: "Re: Question about homework",
+    content: "Thank you for reaching out. Please check the assignment details.",
+    isRead: true,
+    createdAt: "2025-02-14",
+  },
+];
+
+// REPORTS DATA
+export const reportsData = [
+  {
+    id: 1,
+    student: "John Doe",
+    term: "Term 1",
+    academicYear: 2025,
+    averageScore: 85.5,
+    classPosition: 3,
+    attendanceRate: 95.0,
+    teacherComments: "Excellent progress throughout the term.",
+    generatedAt: "2025-02-01",
+  },
+  {
+    id: 2,
+    student: "Jane Doe",
+    term: "Term 1",
+    academicYear: 2025,
+    averageScore: 92.0,
+    classPosition: 1,
+    attendanceRate: 98.0,
+    teacherComments: "Outstanding performance!",
+    generatedAt: "2025-02-01",
+  },
+];
+
+// SUPPORT TICKETS DATA
+export const supportTicketsData = [
+  {
+    id: 1,
+    category: "TECHNICAL",
+    subject: "Cannot access portal",
+    description: "I'm having trouble logging into the parent portal.",
+    status: "OPEN",
+    priority: "HIGH",
+    createdAt: "2025-02-15",
+  },
+  {
+    id: 2,
+    category: "FINANCIAL",
+    subject: "Payment issue",
+    description: "My payment didn't go through properly.",
+    status: "RESOLVED",
+    priority: "MEDIUM",
+    createdAt: "2025-02-10",
+  },
+];
+
 // YOU SHOULD CHANGE THE DATES OF THE EVENTS TO THE CURRENT DATE TO SEE THE EVENTS ON THE CALENDAR
 export const calendarEvents = [
   {
